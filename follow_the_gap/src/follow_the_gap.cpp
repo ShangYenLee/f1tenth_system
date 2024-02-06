@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
+#include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>
@@ -119,6 +120,11 @@ float calculate_gap_center_angle(Obstacle obs, int max_gap_index)
 	return phi_gap_c;
 }
 
+float degree2radious(float degree)
+{
+	return degree*M_PI/180;
+}
+
 class FTGPublisher : public rclcpp::Node
 {
 	public:
@@ -138,9 +144,9 @@ class FTGPublisher : public rclcpp::Node
 			Obstacle obs = compute_basic_info(scan_data);
 			int max_gap_index = find_the_maximum_gap(obs);
 			float gap_center_angle = calculate_gap_center_angle(obs, max_gap_index);
-
+			gap_center_angle = degree2radious(gap_center_angle);
 			auto message = ackermann_msgs::msg::AckermannDriveStamped();
-			message.drive.speed = 2;
+			message.drive.speed = 1;
 			message.drive.steering_angle = gap_center_angle;
 			RCLCPP_INFO(this->get_logger(), "Sending VESC Speed '%f'm/s Steering '%f'", message.drive.speed, message.drive.steering_angle);
 			publisher_->publish(message);
